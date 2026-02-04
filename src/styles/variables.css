@@ -1,0 +1,90 @@
+/* CSS 变量定义 - 亮色主题（默认） */
+.ask-ai {
+  /* 颜色 */
+  --ask-ai-primary: #2563eb;
+  --ask-ai-primary-hover: #1d4ed8;
+  --ask-ai-background: #ffffff;
+  --ask-ai-foreground: #0f172a;
+  --ask-ai-muted: #64748b;
+  --ask-ai-border: #e2e8f0;
+  --ask-ai-error: #dc2626;
+  --ask-ai-button-bg: #f1f5f9;
+
+  /* 用户消息 */
+  --ask-ai-user-message-bg: var(--ask-ai-button-bg);
+  --ask-ai-user-message-text: var(--ask-ai-foreground);
+
+  /* AI 消息 */
+  --ask-ai-ai-message-bg: none;
+  --ask-ai-ai-message-text: var(--ask-ai-foreground);
+
+  /* 字体 */
+  --ask-ai-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ask-ai-monospace-font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --ask-ai-font-size-base: 14px;
+  --ask-ai-line-height: 1.5;
+
+  /* 间距 */
+  --ask-ai-spacing-xs: 4px;
+  --ask-ai-spacing-sm: 8px;
+  --ask-ai-spacing-md: 16px;
+  --ask-ai-spacing-lg: 24px;
+
+  /* 圆角 */
+  --ask-ai-radius-sm: 4px;
+  --ask-ai-radius-md: 8px;
+  --ask-ai-radius-lg: 12px;
+
+  /* 阴影 */
+  --ask-ai-shadow: none;
+
+  /* 动画 */
+  --ask-ai-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 抽屉层级 */
+  --ask-ai-overlay-z-index: 400;
+
+  /* 语法高亮 - 亮色主题 (VS Code Light+) */
+  --ask-ai-code-bg: #f8f8f8;
+  --ask-ai-code-text: #000000;
+  --ask-ai-code-keyword: #0000ff;      /* 关键字：蓝色 */
+  --ask-ai-code-string: #a31515;       /* 字符串：红色 */
+  --ask-ai-code-number: #098658;       /* 数字：绿色 */
+  --ask-ai-code-comment: #008000;      /* 注释：绿色 */
+  --ask-ai-code-function: #795e26;     /* 函数：棕色 */
+  --ask-ai-code-operator: #000000;     /* 操作符：黑色 */
+  --ask-ai-code-variable: #001080;     /* 变量：深蓝 */
+  --ask-ai-code-type: #267f99;         /* 类型：青蓝 */
+  --ask-ai-code-builtin: #0000ff;      /* 内置：蓝色 */
+  --ask-ai-code-tag: #800000;          /* 标签：深红 */
+  --ask-ai-code-attr: #ff0000;         /* 属性：红色 */
+}
+
+/* 明确指定暗色主题 */
+[data-theme="dark"] .ask-ai,
+.dark .ask-ai,
+.ask-ai.dark {
+  --ask-ai-primary: #3b82f6;
+  --ask-ai-primary-hover: #2563eb;
+  --ask-ai-background: #0f172a;
+  --ask-ai-foreground: #f1f5f9;
+  --ask-ai-muted: #94a3b8;
+  --ask-ai-border: #334155;
+  --ask-ai-error: #ef4444;
+  --ask-ai-button-bg: #1e293b;
+
+  /* 语法高亮 - 暗色主题 (VS Code Dark+) */
+  --ask-ai-code-bg: #1e1e1e;
+  --ask-ai-code-text: #d4d4d4;
+  --ask-ai-code-keyword: #569cd6;      /* 关键字：蓝色 */
+  --ask-ai-code-string: #ce9178;       /* 字符串：米色 */
+  --ask-ai-code-number: #b5cea8;       /* 数字：浅绿 */
+  --ask-ai-code-comment: #6a9955;      /* 注释：绿色 */
+  --ask-ai-code-function: #dcdcaa;     /* 函数：黄色 */
+  --ask-ai-code-operator: #d4d4d4;     /* 操作符：浅灰 */
+  --ask-ai-code-variable: #9cdcfe;     /* 变量：青色 */
+  --ask-ai-code-type: #4ec9b0;         /* 类型：青绿 */
+  --ask-ai-code-builtin: #4fc1ff;      /* 内置：亮蓝 */
+  --ask-ai-code-tag: #569cd6;          /* 标签：蓝色 */
+  --ask-ai-code-attr: #9cdcfe;         /* 属性：青色 */
+}

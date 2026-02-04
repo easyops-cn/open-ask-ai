@@ -1,0 +1,47 @@
+/* 全局样式 - 所有样式都在 .ask-ai 命名空间下 */
+
+/* 基础样式重置 */
+.ask-ai *,
+.ask-ai *::before,
+.ask-ai *::after {
+  box-sizing: border-box;
+}
+
+.ask-ai {
+  font-family: var(--ask-ai-font-family);
+  font-size: var(--ask-ai-font-size-base);
+  line-height: var(--ask-ai-line-height);
+  color: var(--ask-ai-foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 确保组件不受外部样式影响 */
+.ask-ai button {
+  font-family: inherit;
+}
+
+.ask-ai input,
+.ask-ai textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* 滚动条样式 */
+.ask-ai ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.ask-ai ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ask-ai ::-webkit-scrollbar-thumb {
+  background: var(--ask-ai-border);
+  border-radius: var(--ask-ai-radius-sm);
+}
+
+.ask-ai ::-webkit-scrollbar-thumb:hover {
+  background: var(--ask-ai-muted);
+}

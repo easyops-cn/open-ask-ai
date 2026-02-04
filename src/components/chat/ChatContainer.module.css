@@ -1,0 +1,522 @@
+/* ChatContainer 组件样式 */
+
+.container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.messagesArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Welcome Screen */
+.welcomeScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.welcomeMessage {
+  font-size: 18px;
+  color: var(--ask-ai-foreground);
+  margin-bottom: 16px;
+}
+
+.exampleQuestionsContainer {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exampleQuestionsTitle {
+  font-size: 14px;
+  color: var(--ask-ai-muted);
+  margin-bottom: 8px;
+}
+
+.exampleButton {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--ask-ai-foreground);
+  background-color: var(--ask-ai-button-bg);
+  border: none;
+  border-radius: var(--ask-ai-radius-md);
+  cursor: pointer;
+  transition: background-color var(--ask-ai-transition);
+}
+
+.exampleButton:hover {
+  background-color: var(--ask-ai-border);
+}
+
+/* Messages */
+.messageWrapper {
+  display: flex;
+}
+
+.messageWrapper.user {
+  justify-content: flex-end;
+}
+
+.messageWrapper.assistant {
+  justify-content: flex-start;
+}
+
+.message {
+  border-radius: var(--ask-ai-radius-lg);
+  padding: 8px 16px;
+}
+
+.message.user {
+  max-width: 85%;
+  background-color: var(--ask-ai-user-message-bg);
+  color: var(--ask-ai-user-message-text);
+}
+
+.message.assistant {
+  width: 100%;
+  background-color: var(--ask-ai-ai-message-bg);
+  color: var(--ask-ai-ai-message-text);
+  padding: 8px 0;
+}
+
+.messageText {
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+/* Markdown Styles */
+.markdown {
+  font-size: 14px;
+  line-height: 1.7142857;
+}
+
+.markdown > *:first-child {
+  margin-top: 0;
+}
+
+.markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Tool Calls */
+.toolCallsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.toolCall {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  background-color: var(--ask-ai-border);
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.toolCall.tool-completed {
+  opacity: 0.7;
+}
+
+.toolCall.tool-pending,
+.toolCall.tool-running {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.toolCall.tool-error {
+  color: var(--ask-ai-error);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* 段落 */
+.markdown p {
+  display: block;
+  margin: 0.5em 0;
+}
+
+/* 标题 */
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  display: block;
+  margin: 1em 0 0.5em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.markdown h1 {
+  font-size: 1.5em;
+}
+
+.markdown h2 {
+  font-size: 1.3em;
+}
+
+.markdown h3 {
+  font-size: 1.1em;
+}
+
+/* 无序列表 */
+.markdown ul {
+  display: block;
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+/* 有序列表 */
+.markdown ol {
+  display: block;
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+/* 嵌套列表 */
+.markdown ul ul {
+  list-style-type: circle;
+}
+
+.markdown ul ul ul {
+  list-style-type: square;
+}
+
+.markdown ol ol {
+  list-style-type: lower-alpha;
+}
+
+.markdown ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* 列表项 */
+.markdown li {
+  display: list-item;
+  margin: 0.25em 0;
+}
+
+/* 文本样式 */
+.markdown strong,
+.markdown b {
+  font-weight: bold;
+}
+
+.markdown em,
+.markdown i {
+  font-style: italic;
+}
+
+.markdown u {
+  text-decoration: underline;
+}
+
+.markdown s,
+.markdown del {
+  text-decoration: line-through;
+}
+
+.markdown code {
+  font-family: var(--ask-ai-monospace-font-family);
+  font-size: 0.9em;
+  padding: 0.15em 0.4em;
+  background-color: var(--ask-ai-border);
+  border-radius: 4px;
+}
+
+/* 代码块容器 */
+.markdown pre {
+  font-size: inherit;
+  margin: 0.75em 0;
+  padding: 0;
+  background-color: var(--ask-ai-code-bg);
+  border-radius: var(--ask-ai-radius-md);
+  overflow-x: auto;
+  line-height: 1.5;
+  position: relative;
+}
+
+/* 代码块包装器 - 用于定位复制按钮 */
+.codeBlockWrapper {
+  position: relative;
+}
+
+/* 复制按钮 */
+.copyButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px;
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0);
+  border: none;
+  color: var(--ask-ai-code-text);
+  opacity: 0.6;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--ask-ai-transition), background-color var(--ask-ai-transition);
+}
+
+.copyButton:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.markdown pre code {
+  display: block;
+  padding: 0.75em 1em;
+  overflow: auto;
+  background-color: transparent;
+  border-radius: 0;
+  font-size: 0.8571429em;
+  line-height: 1.25rem;
+  color: var(--ask-ai-code-text);
+  font-family: var(--ask-ai-monospace-font-family);
+}
+
+/* Highlight.js 语法高亮样式 */
+.markdown :global(.hljs-keyword),
+.markdown :global(.hljs-selector-tag),
+.markdown :global(.hljs-literal),
+.markdown :global(.hljs-section),
+.markdown :global(.hljs-link) {
+  color: var(--ask-ai-code-keyword);
+  font-weight: bold;
+}
+
+.markdown :global(.hljs-string),
+.markdown :global(.hljs-regexp),
+.markdown :global(.hljs-addition),
+.markdown :global(.hljs-attribute),
+.markdown :global(.hljs-meta-string) {
+  color: var(--ask-ai-code-string);
+}
+
+.markdown :global(.hljs-number),
+.markdown :global(.hljs-meta) :global(.hljs-keyword) {
+  color: var(--ask-ai-code-number);
+}
+
+.markdown :global(.hljs-comment),
+.markdown :global(.hljs-quote) {
+  color: var(--ask-ai-code-comment);
+  font-style: italic;
+}
+
+.markdown :global(.hljs-function),
+.markdown :global(.hljs-title) {
+  color: var(--ask-ai-code-function);
+}
+
+.markdown :global(.hljs-operator),
+.markdown :global(.hljs-punctuation) {
+  color: var(--ask-ai-code-operator);
+}
+
+.markdown :global(.hljs-variable),
+.markdown :global(.hljs-property),
+.markdown :global(.hljs-params) {
+  color: var(--ask-ai-code-variable);
+}
+
+.markdown :global(.hljs-type),
+.markdown :global(.hljs-class),
+.markdown :global(.hljs-built_in) {
+  color: var(--ask-ai-code-type);
+}
+
+.markdown :global(.hljs-builtin),
+.markdown :global(.hljs-name) {
+  color: var(--ask-ai-code-builtin);
+}
+
+.markdown :global(.hljs-tag) {
+  color: var(--ask-ai-code-tag);
+}
+
+.markdown :global(.hljs-attr) {
+  color: var(--ask-ai-code-attr);
+}
+
+.markdown :global(.hljs-deletion) {
+  color: var(--ask-ai-error);
+}
+
+.markdown :global(.hljs-emphasis) {
+  font-style: italic;
+}
+
+.markdown :global(.hljs-strong) {
+  font-weight: bold;
+}
+
+.markdown blockquote {
+  margin: 0.5em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--ask-ai-primary);
+  background-color: var(--ask-ai-border);
+  border-radius: 0 var(--ask-ai-radius-sm) var(--ask-ai-radius-sm) 0;
+}
+
+.markdown blockquote p {
+  margin: 0;
+}
+
+.markdown a {
+  color: var(--ask-ai-primary);
+  text-decoration: none;
+}
+
+.markdown a:hover {
+  text-decoration: underline;
+}
+
+.markdown table {
+  width: 100%;
+  margin: 0.75em 0;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.markdown th,
+.markdown td {
+  padding: 0.5em 0.75em;
+  border: 1px solid var(--ask-ai-border);
+  text-align: left;
+}
+
+.markdown th {
+  background-color: var(--ask-ai-border);
+  font-weight: 600;
+}
+
+.markdown hr {
+  margin: 1em 0;
+  border: none;
+  border-top: 1px solid var(--ask-ai-border);
+}
+
+.markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ask-ai-radius-md);
+}
+
+.cursor {
+  display: inline-block;
+  width: 6px;
+  height: 16px;
+  background-color: currentColor;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 0.75;
+  }
+  50.01%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Error */
+.error {
+  padding: 16px;
+  background-color: rgba(220, 38, 38, 0.1);
+  color: var(--ask-ai-error);
+  border-radius: var(--ask-ai-radius-md);
+  font-size: 14px;
+}
+
+/* Input Area */
+.inputForm {
+  border-top: 1px solid var(--ask-ai-border);
+  padding: 16px;
+  margin: 0;
+}
+
+.inputWrapper {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.input {
+  flex: 1;
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: var(--ask-ai-background);
+  border: 1px solid var(--ask-ai-border);
+  border-radius: var(--ask-ai-radius-md);
+  color: var(--ask-ai-foreground);
+  font-family: inherit;
+  resize: none;
+  min-height: 40px;
+  max-height: 200px;
+  line-height: 1.5;
+  overflow-y: auto;
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ask-ai-primary);
+}
+
+.input:disabled {
+  opacity: 0.5;
+}
+
+.submitButton {
+  height: 40px;
+  padding: 8px;
+  font-size: 14px;
+  background-color: var(--ask-ai-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--ask-ai-radius-md);
+  cursor: pointer;
+  transition: all var(--ask-ai-transition);
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--ask-ai-primary-hover);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,0 +1,14 @@
+/* Trigger 组件样式 */
+
+.trigger {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--ask-ai-shadow);
+}
+
+.icon {
+  height: 16px;
+  width: 16px;
+}

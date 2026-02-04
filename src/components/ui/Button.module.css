@@ -1,0 +1,83 @@
+/* Button 组件样式 */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ask-ai-radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--ask-ai-transition);
+  border: none;
+  cursor: pointer;
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ask-ai-background), 0 0 0 4px var(--ask-ai-primary);
+}
+
+.button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Variants */
+.variant-default {
+  background-color: var(--ask-ai-primary);
+  color: #ffffff;
+}
+
+.variant-default:hover:not(:disabled) {
+  background-color: var(--ask-ai-primary-hover);
+}
+
+.variant-outline {
+  border: 1px solid var(--ask-ai-border);
+  background-color: var(--ask-ai-background);
+  color: var(--ask-ai-foreground);
+}
+
+.variant-outline:hover:not(:disabled) {
+  background-color: var(--ask-ai-button-bg);
+}
+
+.variant-ghost {
+  background-color: transparent;
+  color: var(--ask-ai-foreground);
+}
+
+.variant-ghost:hover:not(:disabled) {
+  background-color: var(--ask-ai-button-bg);
+}
+
+.variant-icon {
+  background-color: transparent;
+  color: var(--ask-ai-foreground);
+}
+
+.variant-icon:hover:not(:disabled) {
+  background-color: var(--ask-ai-button-bg);
+}
+
+/* Sizes */
+.size-default {
+  height: 40px;
+  padding: 8px 16px;
+}
+
+.size-sm {
+  height: 36px;
+  padding: 6px 12px;
+}
+
+.size-lg {
+  height: 44px;
+  padding: 10px 32px;
+}
+
+.size-icon {
+  height: 36px;
+  width: 36px;
+  padding: 0;
+}
