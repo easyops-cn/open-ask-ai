@@ -2,7 +2,9 @@
 
 AI-powered Q&A widget for documentation sites. A customizable button component that opens a drawer-style chat interface, designed to be embedded anywhere in your application.
 
-**Now using AI SDK v6 UIMessage format!** See [MIGRATION.md](./MIGRATION.md) for upgrade guide.
+NOTE: this is a frontend-only widget. You need to set up your own backend API to handle AI requests and stream responses via Server-Sent Events (SSE).
+
+Fortunately, setting up the backend is straightforward using the [Open Ask AI Server](https://github.com/easyops-cn/open-ask-ai-server).
 
 ## Features
 
