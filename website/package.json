@@ -1,0 +1,19 @@
+{
+  "name": "website",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "plain-blog",
+    "watch": "node --watch ../node_modules/.bin/plain-blog",
+    "serve": "serve ./dist"
+  },
+  "dependencies": {
+    "open-ask-ai": "^0.6.5",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "plain-blog": "^0.7.1",
+    "serve": "^14.2.5"
+  }
+}

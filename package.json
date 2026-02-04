@@ -2,6 +2,7 @@
   "name": "open-ask-ai-client",
   "private": true,
   "workspaces": [
-    "open-ask-ai"
+    "open-ask-ai",
+    "website"
   ]
 }
