@@ -6,7 +6,7 @@ import { common } from 'lowlight';
 import type { WidgetTexts, UIMessage } from '../../core/types/index.js';
 import styles from './ChatContainer.module.css';
 import { ArrowUp, Copy, Check } from 'lucide-react';
-import { isToolUIPart } from 'ai';
+import type { DynamicToolUIPart, ToolUIPart, UIDataTypes, UIMessagePart, UITools } from 'ai';
 
 interface ChatContainerProps {
   texts?: WidgetTexts;
@@ -137,120 +137,6 @@ export function ChatContainer({
   const welcomeMessage = texts?.welcomeMessage || 'Hi! How can I help you today?';
   const exampleQuestionsTitle = texts?.exampleQuestionsTitle || 'Example questions:';
 
-  // Custom code block component with copy button
-  const CodeBlock = ({ children, className, ...props }: any) => {
-    const [copied, setCopied] = React.useState(false);
-    const match = /language-(\w+)/.exec(className || '');
-    const isCodeBlock = match;
-
-    const handleCopy = async () => {
-      // Recursively extract text content from React elements
-      const getTextContent = (node: any): string => {
-        if (typeof node === 'string') return node;
-        if (typeof node === 'number') return String(node);
-        if (Array.isArray(node)) return node.map(getTextContent).join('');
-        if (node?.props?.children) return getTextContent(node.props.children);
-        return '';
-      };
-
-      const code = getTextContent(children).replace(/\n$/, '');
-      try {
-        await navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy:', err);
-      }
-    };
-
-    if (isCodeBlock) {
-      return (
-        <div className={styles.codeBlockWrapper}>
-          <button
-            onClick={handleCopy}
-            className={styles.copyButton}
-            aria-label="Copy code"
-          >
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-          </button>
-          <code className={className} {...props}>
-            {children}
-          </code>
-        </div>
-      );
-    }
-
-    return <code className={className} {...props}>{children}</code>;
-  };
-
-  // Helper function to format tool name
-  const getToolDisplayName = (toolName: string) => {
-    if (toolName.toLowerCase() === 'readFile') {
-      return 'Reading docs';
-    }
-    if (toolName.toLowerCase() === 'bash') {
-      return 'Exploring docs';
-    }
-    return 'Searching docs';
-  };
-
-  // Render a single message part
-  const renderMessagePart = (part: any, index: number) => {
-    if (part.type === 'text') {
-      return (
-        <div key={index} className={styles.textPart}>
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[[rehypeHighlight, {
-              languages: common,
-              prefix: 'hljs-'
-            }]]}
-            components={{
-              code: CodeBlock
-            }}
-          >
-            {part.text}
-          </ReactMarkdown>
-          {part.state === 'streaming' && (
-            <span className={styles.cursor} />
-          )}
-        </div>
-      );
-    }
-
-    if (part.type === 'reasoning') {
-      return (
-        <div key={index} className={styles.reasoningPart}>
-          <div className={styles.reasoningLabel}>Reasoning:</div>
-          <div className={styles.reasoningContent}>
-            {part.text}
-            {part.state === 'streaming' && (
-              <span className={styles.cursor} />
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    if (isToolUIPart(part)) {
-      const status = part.state === 'output-available' ? 'completed' :
-                     part.state === 'output-error' ? 'error' :
-                     part.state === 'input-streaming' ? 'running' : 'pending';
-
-      return (
-        <div key={index} className={styles.toolPart}>
-          <span className={`${styles.toolCall} ${styles[`tool-${status}`]}`}>
-            {getToolDisplayName(part.type === 'dynamic-tool' ? part.toolName : part.type.replace('tool-', ''))}
-            {(status === 'completed' || status === 'error') ? '' : '...'}
-          </span>
-        </div>
-      );
-    }
-
-    // Handle other part types if needed
-    return null;
-  };
-
   return (
     <div className={styles.container}>
       {/* Messages Area */}
@@ -286,7 +172,7 @@ export function ChatContainer({
         ) : (
           // Messages
           <>
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <div
                 key={message.id}
                 className={`${styles.messageWrapper} ${styles[message.role]}`}
@@ -295,7 +181,8 @@ export function ChatContainer({
                   {message.role === 'assistant' ? (
                     <div className={styles.markdown}>
                       {/* Render each part in order */}
-                      {message.parts.map((part, index) => renderMessagePart(part, index))}
+                      {message.parts.map((part, index) => <MessagePart key={index} part={part} />)}
+                      {isStreaming && index === messages.length -1 && <span className={styles.cursor} />}
                     </div>
                   ) : (
                     <div className={styles.messageText}>
@@ -342,4 +229,115 @@ export function ChatContainer({
       </form>
     </div>
   );
+}
+
+function CodeBlock({ children, className, ...props }: any) {
+  const [copied, setCopied] = React.useState(false);
+  const match = /language-(\w+)/.exec(className || '');
+  const isCodeBlock = match;
+
+  const handleCopy = async () => {
+    // Recursively extract text content from React elements
+    const getTextContent = (node: any): string => {
+      if (typeof node === 'string') return node;
+      if (typeof node === 'number') return String(node);
+      if (Array.isArray(node)) return node.map(getTextContent).join('');
+      if (node?.props?.children) return getTextContent(node.props.children);
+      return '';
+    };
+
+    const code = getTextContent(children).replace(/\n$/, '');
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  if (isCodeBlock) {
+    return (
+      <div className={styles.codeBlockWrapper}>
+        <button
+          onClick={handleCopy}
+          className={styles.copyButton}
+          aria-label="Copy code"
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+        </button>
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </div>
+    );
+  }
+
+  return <code className={className} {...props}>{children}</code>;
+}
+
+function MessagePart({part}: {part: UIMessagePart<UIDataTypes, UITools>}) {
+  if (part.type === 'text') {
+    return (
+      <div className={styles.textPart}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[[rehypeHighlight, {
+            languages: common,
+            prefix: 'hljs-'
+          }]]}
+          components={{
+            code: CodeBlock
+          }}
+        >
+          {part.text}
+        </ReactMarkdown>
+      </div>
+    );
+  }
+
+  if (part.type === 'reasoning') {
+    return null;
+    // return (
+    //   <div className={`${styles.reasoningPart} ${styles[`reasoning-${part.state}`]}`}>
+    //     <div className={styles.reasoningLabel}>Thinking...</div>
+    //     <div className={styles.reasoningContent}>
+    //       {part.text}
+    //     </div>
+    //   </div>
+    // );
+  }
+
+  if (isToolUIPart(part)) {
+    const status = part.state === 'output-available' ? 'completed' :
+                    part.state === 'output-error' ? 'error' :
+                    part.state === 'input-streaming' ? 'running' : 'pending';
+
+    return (
+      <div className={styles.toolPart}>
+        <span className={`${styles.toolCall} ${styles[`tool-${status}`]}`}>
+          {getToolDisplayName(part.type === 'dynamic-tool' ? part.toolName : part.type.replace('tool-', ''))}
+          {(status === 'completed' || status === 'error') ? '' : '...'}
+        </span>
+      </div>
+    );
+  }
+
+  // Handle other part types if needed
+  return null;
+};
+
+// Helper function to format tool name
+const getToolDisplayName = (toolName: string) => {
+  if (toolName === 'readFile') {
+    return 'Reading docs';
+  }
+  if (toolName === 'bash') {
+    return 'Exploring docs';
+  }
+  return 'Searching docs';
+};
+
+function isToolUIPart(part: UIMessagePart<UIDataTypes, UITools>): part is DynamicToolUIPart | ToolUIPart {
+  return part.type === 'dynamic-tool' || part.type.startsWith('tool-');
 }
