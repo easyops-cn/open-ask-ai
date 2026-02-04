@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { useSession } from './useSession.js';
 import { useSSE } from './useSSE.js';
-import type { Message, WidgetTexts } from '../types/index.js';
+import type { UIMessage, UIMessageChunk, WidgetTexts } from '../types/index.js';
 import type { APIClient } from '../api/client.js';
 
 interface UseChatOptions {
@@ -10,103 +9,208 @@ interface UseChatOptions {
 }
 
 interface UseChatReturn {
-  messages: Message[];
+  messages: UIMessage[];
   isStreaming: boolean;
   error: Error | null;
-  sessionError: Error | null;
-  isCreatingSession: boolean;
   sendMessage: (text: string) => Promise<void>;
-  resetChat: () => Promise<void>;
+  resetChat: () => void;
 }
 
 let idCounter = 0;
 
 function getMessageId() {
   idCounter += 1;
-  return `msg-${idCounter}`;  
+  return `msg-${idCounter}`;
 }
 
-export function useChat({ apiClient, texts }: UseChatOptions): UseChatReturn {
-  const [messages, setMessages] = useState<Message[]>([]);
+/**
+ * Apply a UIMessageChunk to update the current assistant message
+ */
+function applyChunkToMessage(message: UIMessage, chunk: UIMessageChunk): UIMessage {
+  const parts = [...message.parts];
+
+  switch (chunk.type) {
+    case 'text-start': {
+      // Start a new text part
+      parts.push({
+        type: 'text',
+        text: '',
+        state: 'streaming',
+      });
+      break;
+    }
+
+    case 'text-delta': {
+      // Find the last text part and append delta
+      const lastTextIndex = parts.findLastIndex((p: any) => p.type === 'text');
+      if (lastTextIndex >= 0) {
+        const textPart = parts[lastTextIndex];
+        if (textPart.type === 'text') {
+          parts[lastTextIndex] = {
+            ...textPart,
+            text: textPart.text + chunk.delta,
+          };
+        }
+      }
+      break;
+    }
+
+    case 'text-end': {
+      // Mark the last text part as done
+      const lastTextIndex = parts.findLastIndex((p: any) => p.type === 'text');
+      if (lastTextIndex >= 0) {
+        const textPart = parts[lastTextIndex];
+        if (textPart.type === 'text') {
+          parts[lastTextIndex] = {
+            ...textPart,
+            state: 'done',
+          };
+        }
+      }
+      break;
+    }
+
+    case 'reasoning-start': {
+      // Start a new reasoning part
+      parts.push({
+        type: 'reasoning',
+        text: '',
+        state: 'streaming',
+      });
+      break;
+    }
+
+    case 'reasoning-delta': {
+      // Find the last reasoning part and append delta
+      const lastReasoningIndex = parts.findLastIndex((p: any) => p.type === 'reasoning');
+      if (lastReasoningIndex >= 0) {
+        const reasoningPart = parts[lastReasoningIndex];
+        if (reasoningPart.type === 'reasoning') {
+          parts[lastReasoningIndex] = {
+            ...reasoningPart,
+            text: reasoningPart.text + chunk.delta,
+          };
+        }
+      }
+      break;
+    }
+
+    case 'reasoning-end': {
+      // Mark the last reasoning part as done
+      const lastReasoningIndex = parts.findLastIndex((p: any) => p.type === 'reasoning');
+      if (lastReasoningIndex >= 0) {
+        const reasoningPart = parts[lastReasoningIndex];
+        if (reasoningPart.type === 'reasoning') {
+          parts[lastReasoningIndex] = {
+            ...reasoningPart,
+            state: 'done',
+          };
+        }
+      }
+      break;
+    }
+
+    case 'tool-input-start': {
+      // Start a new dynamic tool call
+      parts.push({
+        type: 'dynamic-tool',
+        toolCallId: chunk.toolCallId,
+        toolName: chunk.toolName,
+        input: undefined,
+        state: 'input-streaming',
+      } as any);
+      break;
+    }
+
+    case 'tool-input-available': {
+      // Update tool call with input
+      const toolIndex = parts.findIndex(
+        (p: any) => p.type === 'dynamic-tool' && p.toolCallId === chunk.toolCallId
+      );
+      if (toolIndex >= 0) {
+        const toolPart = parts[toolIndex] as any;
+        parts[toolIndex] = {
+          ...toolPart,
+          input: chunk.input,
+          state: 'input-available',
+        };
+      }
+      break;
+    }
+
+    case 'tool-output-available': {
+      // Update tool call with output
+      const toolIndex = parts.findIndex(
+        (p: any) => p.type === 'dynamic-tool' && p.toolCallId === chunk.toolCallId
+      );
+      if (toolIndex >= 0) {
+        const toolPart = parts[toolIndex] as any;
+        parts[toolIndex] = {
+          ...toolPart,
+          output: chunk.output,
+          state: 'output-available',
+        };
+      }
+      break;
+    }
+
+    case 'tool-output-error': {
+      // Update tool call with error
+      const toolIndex = parts.findIndex(
+        (p: any) => p.type === 'dynamic-tool' && p.toolCallId === chunk.toolCallId
+      );
+      if (toolIndex >= 0) {
+        const toolPart = parts[toolIndex] as any;
+        parts[toolIndex] = {
+          ...toolPart,
+          errorText: chunk.errorText,
+          state: 'error',
+        };
+      }
+      break;
+    }
+
+    case 'error': {
+      // Handle error chunk - could add error state to message
+      console.error('Stream error:', chunk.errorText);
+      break;
+    }
+
+    // Add other chunk types as needed
+    default:
+      // Ignore unknown chunk types
+      break;
+  }
+
+  return {
+    ...message,
+    parts,
+  };
+}
+
+export function useChat({ apiClient }: UseChatOptions): UseChatReturn {
+  const [messages, setMessages] = useState<UIMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const { sessionId, isCreating: isCreatingSession, error: sessionError, initializeSession, clearSession } = useSession({ apiClient });
-
-  const { handleSSEStream } = useSSE({
-    onConnected: () => {
-      console.log('SSE connected');
-    },
-    onMessage: (data) => {
-      if (data.type === 'answer' && data.text) {
-        // Accumulate the answer text
-        setMessages((prev) => {
-          const lastMessage = prev[prev.length - 1];
-          if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-            // Update the last assistant message
-            return prev.slice(0, -1).concat({
-              ...lastMessage,
-              content: lastMessage.content + data.text,
-            });
-          }
-          return prev;
-        });
-      } else if (data.type === 'tool') {
-        // Handle tool updates
-        setMessages((prev) => {
-          const lastMessage = prev[prev.length - 1];
-          if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-            // Get existing tool calls or create new array
-            const existingToolCalls = lastMessage.toolCalls || [];
-
-            // Find the tool call with this callID
-            const toolIndex = existingToolCalls.findIndex(tc => tc.callID === data.callID);
-
-            let updatedToolCalls;
-            if (toolIndex >= 0) {
-              // Update existing tool call
-              updatedToolCalls = [...existingToolCalls];
-              updatedToolCalls[toolIndex] = {
-                callID: data.callID,
-                tool: data.tool,
-                status: data.status,
-              };
-            } else {
-              // Add new tool call
-              updatedToolCalls = [...existingToolCalls, {
-                callID: data.callID,
-                tool: data.tool,
-                status: data.status,
-              }];
-            }
-
-            return prev.slice(0, -1).concat({
-              ...lastMessage,
-              toolCalls: updatedToolCalls,
-            });
-          }
-          return prev;
-        });
+  const { handleUIMessageStream } = useSSE({
+    onChunk: (chunk) => {
+      if (chunk.type === 'error') {
+        setError(new Error(chunk.errorText));
+        setIsStreaming(false);
+        return;
       }
-    },
-    onDone: () => {
-      // Mark streaming complete
+
+      // Update the last assistant message with the chunk
       setMessages((prev) => {
         const lastMessage = prev[prev.length - 1];
         if (lastMessage && lastMessage.role === 'assistant') {
-          // If AI didn't send any content, show a fallback message
-          const emptyResponseText = texts?.emptyResponseText || 'Something went wrong. Please try again later.';
-          const content = lastMessage.content.trim() || emptyResponseText;
-          return prev.slice(0, -1).concat({
-            ...lastMessage,
-            content,
-            isStreaming: false,
-          });
+          const updatedMessage = applyChunkToMessage(lastMessage, chunk);
+          return [...prev.slice(0, -1), updatedMessage];
         }
         return prev;
       });
-      setIsStreaming(false);
     },
     onError: (err) => {
       setError(err);
@@ -114,7 +218,7 @@ export function useChat({ apiClient, texts }: UseChatOptions): UseChatReturn {
       // Remove the failed assistant message
       setMessages((prev) => {
         const lastMessage = prev[prev.length - 1];
-        if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
+        if (lastMessage && lastMessage.role === 'assistant' && lastMessage.parts.length === 0) {
           return prev.slice(0, -1);
         }
         return prev;
@@ -138,58 +242,37 @@ export function useChat({ apiClient, texts }: UseChatOptions): UseChatReturn {
       abortControllerRef.current = abortController;
 
       setError(null);
-
       setIsStreaming(true);
 
       // Add user message immediately (optimistic UI)
-      const userMessage: Message = {
+      const userMessage: UIMessage = {
         id: getMessageId(),
         role: 'user',
-        content: text,
-        timestamp: Date.now(),
+        parts: [
+          {
+            type: 'text',
+            text,
+          },
+        ],
       };
-      setMessages((prev) => [...prev, userMessage]);
 
       // Add placeholder for assistant response
-      const assistantMessage: Message = {
+      const assistantMessage: UIMessage = {
         id: getMessageId(),
         role: 'assistant',
-        content: '',
-        timestamp: Date.now(),
-        isStreaming: true,
+        parts: [],
       };
-      setMessages((prev) => [...prev, assistantMessage]);
 
-      // Create session if it doesn't exist yet
-      let currentSessionId = sessionId;
-      if (!currentSessionId && !isCreatingSession) {
-        try {
-          currentSessionId = await initializeSession();
-        } catch (err) {
-          setError(new Error('Failed to create session'));
-          setIsStreaming(false);
-          return;
-        }
-      }
-
-      // Wait for session to be created if it's currently being created
-      if (isCreatingSession) {
-        setError(new Error('Session is being created, please try again'));
-        return;
-      }
-
-      if (!currentSessionId) {
-        setError(new Error('No active session'));
-        return;
-      }
+      const newMessages = [...messages, userMessage];
+      setMessages([...newMessages, assistantMessage]);
 
       try {
-        const response = await apiClient.askQuestion(
-          currentSessionId,
-          text,
+        const response = await apiClient.sendMessages(
+          newMessages,
           abortController.signal
         );
-        await handleSSEStream(response);
+        await handleUIMessageStream(response, assistantMessage);
+        setIsStreaming(false);
       } catch (err) {
         // Don't treat aborted requests as errors
         if (err instanceof Error && err.name === 'AbortError') {
@@ -209,10 +292,10 @@ export function useChat({ apiClient, texts }: UseChatOptions): UseChatReturn {
         }
       }
     },
-    [sessionId, isCreatingSession, initializeSession, apiClient, handleSSEStream]
+    [messages, apiClient, handleUIMessageStream]
   );
 
-  const resetChat = useCallback(async () => {
+  const resetChat = useCallback(() => {
     // Abort any ongoing request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -222,15 +305,12 @@ export function useChat({ apiClient, texts }: UseChatOptions): UseChatReturn {
     setMessages([]);
     setError(null);
     setIsStreaming(false);
-    await clearSession();
-  }, [clearSession]);
+  }, []);
 
   return {
     messages,
     isStreaming,
     error,
-    sessionError,
-    isCreatingSession,
     sendMessage,
     resetChat,
   };

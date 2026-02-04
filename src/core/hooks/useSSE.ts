@@ -1,57 +1,39 @@
 import { useCallback } from 'react';
-import type { SSEData } from '../types/index.js';
+import type { UIMessage, UIMessageChunk } from '../types/index.js';
 
 interface UseSSEOptions {
-  onConnected?: () => void;
-  onMessage?: (data: SSEData) => void;
-  onDone?: () => void;
+  onChunk?: (chunk: UIMessageChunk) => void;
   onError?: (error: Error) => void;
 }
 
 interface UseSSEReturn {
-  handleSSEStream: (response: Response) => Promise<void>;
+  handleUIMessageStream: (response: Response, currentMessage: UIMessage) => Promise<void>;
 }
 
 /**
- * Parse SSE chunk format: "event: type\ndata: json\n\n"
+ * Parse SSE chunk format for UIMessageChunk stream
+ * Format: "0:{...}\n" where 0 is the chunk type identifier
  */
-function parseSSEChunk(chunk: string): Array<{ event: string; data: any }> {
-  const events: Array<{ event: string; data: any }> = [];
-  const lines = chunk.split('\n');
-  let currentEvent = '';
-  let currentData = '';
-
-  for (const line of lines) {
-    if (line.startsWith('event: ')) {
-      currentEvent = line.slice(7).trim();
-    } else if (line.startsWith('data: ')) {
-      currentData = line.slice(6).trim();
-    } else if (line === '') {
-      // Empty line marks end of event
-      if (currentEvent && currentData) {
-        try {
-          const parsedData = JSON.parse(currentData);
-          events.push({
-            event: currentEvent,
-            data: parsedData,
-          });
-        } catch (err) {
-          console.error('Failed to parse SSE data:', currentData, err);
-        }
-        currentEvent = '';
-        currentData = '';
-      }
-    }
+function parseUIMessageChunk(line: string): UIMessageChunk | null {
+  // AI SDK v6 streams chunks in format: "0:{json}\n"
+  if (!line.startsWith('0:')) {
+    return null;
   }
 
-  return events;
+  try {
+    const jsonStr = line.slice(2);
+    return JSON.parse(jsonStr) as UIMessageChunk;
+  } catch (err) {
+    console.error('Failed to parse UIMessageChunk:', line, err);
+    return null;
+  }
 }
 
 export function useSSE(options: UseSSEOptions = {}): UseSSEReturn {
-  const { onConnected, onMessage, onDone, onError } = options;
+  const { onChunk, onError } = options;
 
-  const handleSSEStream = useCallback(
-    async (response: Response) => {
+  const handleUIMessageStream = useCallback(
+    async (response: Response, _currentMessage: UIMessage) => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
 
@@ -72,28 +54,21 @@ export function useSSE(options: UseSSEOptions = {}): UseSSEReturn {
 
           buffer += decoder.decode(value, { stream: true });
 
-          // Process complete events
-          const events = parseSSEChunk(buffer);
+          // Process complete lines
+          const lines = buffer.split('\n');
 
-          for (const { event, data } of events) {
-            if (event === 'connected') {
-              onConnected?.();
-              onMessage?.(data);
-            } else if (event === 'answer' || event === 'tool') {
-              onMessage?.(data);
-            } else if (event === 'done') {
-              onDone?.();
-              onMessage?.(data);
-            } else if (event === 'error') {
-              onError?.(new Error(data.error || 'Unknown error'));
-              onMessage?.(data);
+          // Keep the last incomplete line in the buffer
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line.trim()) {
+              continue;
             }
-          }
 
-          // Clear processed events from buffer (keep incomplete data)
-          const lastEventEnd = buffer.lastIndexOf('\n\n');
-          if (lastEventEnd !== -1) {
-            buffer = buffer.slice(lastEventEnd + 2);
+            const chunk = parseUIMessageChunk(line);
+            if (chunk) {
+              onChunk?.(chunk);
+            }
           }
         }
       } catch (err) {
@@ -107,10 +82,10 @@ export function useSSE(options: UseSSEOptions = {}): UseSSEReturn {
         reader.releaseLock();
       }
     },
-    [onConnected, onMessage, onDone, onError]
+    [onChunk, onError]
   );
 
   return {
-    handleSSEStream,
+    handleUIMessageStream,
   };
 }

@@ -3,9 +3,10 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { common } from 'lowlight';
-import type { WidgetTexts, Message } from '../../core/types/index.js';
+import type { WidgetTexts, UIMessage } from '../../core/types/index.js';
 import styles from './ChatContainer.module.css';
 import { ArrowUp, Copy, Check } from 'lucide-react';
+import { isToolUIPart } from 'ai';
 
 interface ChatContainerProps {
   texts?: WidgetTexts;
@@ -13,7 +14,7 @@ interface ChatContainerProps {
   onMessage?: (message: any) => void;
   onError?: (error: Error) => void;
   // Lifted state from parent
-  messages: Message[];
+  messages: UIMessage[];
   isStreaming: boolean;
   error: Error | null;
   sendMessage: (text: string) => Promise<void>;
@@ -184,13 +185,70 @@ export function ChatContainer({
 
   // Helper function to format tool name
   const getToolDisplayName = (toolName: string) => {
-    if (toolName.toLowerCase() === 'read') {
+    if (toolName.toLowerCase() === 'readFile') {
       return 'Reading docs';
     }
-    if (toolName.toLowerCase() === 'task') {
+    if (toolName.toLowerCase() === 'bash') {
       return 'Exploring docs';
     }
     return 'Searching docs';
+  };
+
+  // Render a single message part
+  const renderMessagePart = (part: any, index: number) => {
+    if (part.type === 'text') {
+      return (
+        <div key={index} className={styles.textPart}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[[rehypeHighlight, {
+              languages: common,
+              prefix: 'hljs-'
+            }]]}
+            components={{
+              code: CodeBlock
+            }}
+          >
+            {part.text}
+          </ReactMarkdown>
+          {part.state === 'streaming' && (
+            <span className={styles.cursor} />
+          )}
+        </div>
+      );
+    }
+
+    if (part.type === 'reasoning') {
+      return (
+        <div key={index} className={styles.reasoningPart}>
+          <div className={styles.reasoningLabel}>Reasoning:</div>
+          <div className={styles.reasoningContent}>
+            {part.text}
+            {part.state === 'streaming' && (
+              <span className={styles.cursor} />
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (isToolUIPart(part)) {
+      const status = part.state === 'output-available' ? 'completed' :
+                     part.state === 'output-error' ? 'error' :
+                     part.state === 'input-streaming' ? 'running' : 'pending';
+
+      return (
+        <div key={index} className={styles.toolPart}>
+          <span className={`${styles.toolCall} ${styles[`tool-${status}`]}`}>
+            {getToolDisplayName(part.type === 'dynamic-tool' ? part.toolName : part.type.replace('tool-', ''))}
+            {(status === 'completed' || status === 'error') ? '' : '...'}
+          </span>
+        </div>
+      );
+    }
+
+    // Handle other part types if needed
+    return null;
   };
 
   return (
@@ -236,39 +294,16 @@ export function ChatContainer({
                 <div className={`${styles.message} ${styles[message.role]}`}>
                   {message.role === 'assistant' ? (
                     <div className={styles.markdown}>
-                      {/* Display tool calls if present */}
-                      {message.toolCalls && message.toolCalls.length > 0 && (
-                        <div className={styles.toolCallsContainer}>
-                          {message.toolCalls.map((toolCall) => (
-                            <span
-                              key={toolCall.callID}
-                              className={`${styles.toolCall} ${styles[`tool-${toolCall.status}`]}`}
-                            >
-                              {getToolDisplayName(toolCall.tool)}
-                              {(toolCall.status === 'completed' || toolCall.status === 'error') ? '' : '...'}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        rehypePlugins={[[rehypeHighlight, {
-                          languages: common,
-                          prefix: 'hljs-'
-                        }]]}
-                        components={{
-                          code: CodeBlock
-                        }}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
-                      {message.isStreaming && (
-                        <span className={styles.cursor} />
-                      )}
+                      {/* Render each part in order */}
+                      {message.parts.map((part, index) => renderMessagePart(part, index))}
                     </div>
                   ) : (
                     <div className={styles.messageText}>
-                      {message.content}
+                      {/* For user messages, extract and display text */}
+                      {message.parts
+                        .filter(part => part.type === 'text')
+                        .map(part => part.type === 'text' ? part.text : '')
+                        .join('')}
                     </div>
                   )}
                 </div>

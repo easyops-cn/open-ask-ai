@@ -113,6 +113,42 @@
   margin-bottom: 0;
 }
 
+/* Message Parts */
+.textPart {
+  margin-bottom: 8px;
+}
+
+.textPart:last-child {
+  margin-bottom: 0;
+}
+
+.reasoningPart {
+  margin: 12px 0;
+  padding: 12px;
+  background-color: var(--ask-ai-border);
+  border-radius: var(--ask-ai-radius-md);
+  border-left: 3px solid var(--ask-ai-primary);
+}
+
+.reasoningLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ask-ai-primary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reasoningContent {
+  font-size: 13px;
+  color: var(--ask-ai-muted);
+  line-height: 1.6;
+}
+
+.toolPart {
+  margin: 8px 0;
+}
+
 /* Tool Calls */
 .toolCallsContainer {
   display: flex;

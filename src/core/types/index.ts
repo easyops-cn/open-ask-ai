@@ -1,62 +1,13 @@
-export interface ToolCall {
-  callID: string;
-  tool: string;
-  status: 'pending' | 'running' | 'completed' | 'error';
-}
+import type { UIMessage, UIMessageChunk } from 'ai';
 
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
-  isStreaming?: boolean;
-  toolCalls?: ToolCall[];
-}
+// Re-export AI SDK types
+export type { UIMessage, UIMessageChunk };
 
 export interface ChatState {
-  messages: Message[];
+  messages: UIMessage[];
   isStreaming: boolean;
   error: Error | null;
 }
-
-export interface SessionResponse {
-  sessionId: string;
-  expiresIn: number;
-}
-
-export interface SSEEvent {
-  event: string;
-  data: any;
-}
-
-export interface SSEConnectedData {
-  type: 'connected';
-}
-
-export interface SSEAnswerData {
-  type: 'answer';
-  text: string;
-  sessionId: string;
-}
-
-export interface SSEDoneData {
-  type: 'done';
-}
-
-export interface SSEErrorData {
-  type: 'error';
-  error: string;
-}
-
-export interface SSEToolData {
-  type: 'tool';
-  tool: string;
-  callID: string;
-  status: 'pending' | 'running' | 'completed' | 'error';
-  sessionId: string;
-}
-
-export type SSEData = SSEConnectedData | SSEAnswerData | SSEDoneData | SSEErrorData | SSEToolData;
 
 // Widget-specific types
 export interface WidgetTexts {
@@ -81,12 +32,12 @@ export interface WidgetTexts {
 
 export interface WidgetProps {
   // API configuration (required)
+  // The complete URL for the SSE stream endpoint, e.g., 'https://example.com/api/stream'
   apiUrl: string;
 
-  // Project configuration (optional)
-  // If specified, uses project-scoped API endpoints: /api/projects/:projectId/...
-  // If not specified, uses global API endpoints: /api/...
-  projectId?: string;
+  // Project identifier (optional)
+  // Will be sent in the request body along with messages
+  project?: string;
 
   // UI configuration
   drawerPosition?: 'right' | 'left';
@@ -105,7 +56,7 @@ export interface WidgetProps {
   // Callbacks
   onOpen?: () => void;
   onClose?: () => void;
-  onMessage?: (message: Message) => void;
+  onMessage?: (message: UIMessage) => void;
   onError?: (error: Error) => void;
 
   // Advanced configuration

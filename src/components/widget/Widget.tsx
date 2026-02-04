@@ -13,7 +13,7 @@ const ChatContainer = React.lazy(() => import('../chat/ChatContainer.js').then(m
 export function Widget(props: WidgetProps) {
   const {
     apiUrl,
-    projectId,
+    project,
     drawerPosition = 'right',
     drawerWidth = 600,
     drawerExpandedWidth = 920,
@@ -33,7 +33,7 @@ export function Widget(props: WidgetProps) {
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [componentsLoaded, setComponentsLoaded] = React.useState(false);
-  const [apiClient] = React.useState(() => new APIClient(apiUrl, projectId));
+  const [apiClient] = React.useState(() => new APIClient(apiUrl, project));
 
   // Lift chat state to Widget level to persist across drawer open/close
   const { messages, isStreaming, error, sendMessage, resetChat } = useChat({ apiClient, texts });
@@ -68,9 +68,9 @@ export function Widget(props: WidgetProps) {
   }, [onClose]);
 
   // Handle new session
-  const handleNewSession = React.useCallback(async () => {
+  const handleNewSession = React.useCallback(() => {
     setInput('');
-    await resetChat();
+    resetChat();
   }, [resetChat]);
 
   // Handle keyboard shortcut

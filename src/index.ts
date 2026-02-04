@@ -3,7 +3,7 @@ export { Widget as AskAIWidget } from './components/widget/Widget.js';
 
 // Types
 export type {
-  Message,
+  UIMessage,
   WidgetProps,
   WidgetTexts,
 } from './core/types/index.js';
@@ -14,7 +14,6 @@ export { APIClient } from './core/api/client.js';
 // Hooks (for custom implementations)
 export {
   useChat,
-  useSession,
   useSSE,
 } from './core/hooks/index.js';
 

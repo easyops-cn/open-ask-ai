@@ -2,6 +2,8 @@
 
 AI-powered Q&A widget for documentation sites. A customizable button component that opens a drawer-style chat interface, designed to be embedded anywhere in your application.
 
+**Now using AI SDK v6 UIMessage format!** See [MIGRATION.md](./MIGRATION.md) for upgrade guide.
+
 ## Features
 
 - 🎯 **Embeddable Button**: A regular button component that can be placed anywhere in your layout (header, sidebar, footer, etc.)
@@ -10,7 +12,8 @@ AI-powered Q&A widget for documentation sites. A customizable button component t
 - 🎨 **Customizable Theming**: Override styles via CSS variables
 - 🌍 **Multi-language Support**: Customize all UI text through props
 - ⌨️ **Keyboard Shortcut**: Optional hotkey support (e.g., Cmd+K)
-- ⚡ **Modern Stack**: Built with React 19, TypeScript, and Tailwind CSS
+- ⚡ **Modern Stack**: Built with React 19, TypeScript, and AI SDK v6
+- 🔄 **Stateless**: No session management required - all messages sent with each request
 
 ## Installation
 
@@ -33,7 +36,8 @@ function Header() {
 
       {/* Embed the Ask AI button anywhere */}
       <AskAIWidget
-        apiUrl="http://localhost:3000"
+        apiUrl="http://localhost:3000/api/stream"
+        project="my-docs"
         exampleQuestions={[
           "How do I get started?",
           "What are the key features?"
@@ -51,18 +55,20 @@ function Header() {
 ```tsx
 interface WidgetProps {
   // Required
-  apiUrl: string                      // Agent API URL
+  apiUrl: string                      // Complete URL to SSE stream endpoint (e.g., 'https://example.com/api/stream')
+
+  // Optional
+  project?: string                    // Project identifier (sent in request body)
 
   // UI Configuration
   drawerPosition?: 'right' | 'left'   // Drawer slide direction (default: 'right')
-  drawerWidth?: number | string       // Drawer width (default: 400)
+  drawerWidth?: number | string       // Drawer width (default: 600)
+  drawerExpandedWidth?: number | string // Expanded drawer width (default: 920)
+  theme?: 'light' | 'dark'            // Theme (default: 'light')
 
   // Content
   texts?: WidgetTexts                 // All UI text labels (see below)
   exampleQuestions?: string[]         // Questions shown in empty state
-
-  // AI Configuration
-  systemPrompt?: string               // Custom system prompt for AI assistant
 
   // Interaction
   hotkey?: string                     // Keyboard shortcut (e.g., 'cmd+k', 'ctrl+k')
@@ -71,12 +77,15 @@ interface WidgetProps {
   // Callbacks
   onOpen?: () => void                 // Called when drawer opens
   onClose?: () => void                // Called when drawer closes
-  onMessage?: (message: Message) => void
+  onMessage?: (message: UIMessage) => void
   onError?: (error: Error) => void
 
   // Styling
   className?: string                  // Additional CSS classes
   style?: React.CSSProperties         // Inline styles (for CSS variables)
+
+  // Custom trigger
+  children?: React.ReactElement       // Custom trigger button
 }
 ```
 
@@ -145,7 +154,7 @@ function Header() {
       <Logo />
       <nav>{/* Navigation items */}</nav>
       <div className="flex items-center gap-2">
-        <AskAIWidget apiUrl="http://localhost:3000" />
+        <AskAIWidget apiUrl="http://localhost:3000/api/stream" />
         <ThemeToggle />
       </div>
     </header>
@@ -162,7 +171,7 @@ function Sidebar() {
       <nav>{/* Menu items */}</nav>
       <div className="mt-auto p-4">
         <AskAIWidget
-          apiUrl="http://localhost:3000"
+          apiUrl="http://localhost:3000/api/stream"
           drawerPosition="left"
         />
       </div>
@@ -175,7 +184,7 @@ function Sidebar() {
 
 ```tsx
 <AskAIWidget
-  apiUrl="http://localhost:3000"
+  apiUrl="http://localhost:3000/api/stream"
   hotkey="cmd+k"          // Cmd+K on Mac, Ctrl+K on Windows/Linux
   enableHotkey={true}
 />
@@ -185,12 +194,17 @@ function Sidebar() {
 
 ```tsx
 <AskAIWidget
-  apiUrl="http://localhost:3000"
+  apiUrl="http://localhost:3000/api/stream"
   onOpen={() => console.log('AI assistant opened')}
   onClose={() => console.log('AI assistant closed')}
   onMessage={(message) => {
     // Track messages for analytics
-    analytics.track('ai_message', { role: message.role })
+    // Extract text from message parts
+    const text = message.parts
+      .filter(p => p.type === 'text')
+      .map(p => p.type === 'text' ? p.text : '')
+      .join('');
+    analytics.track('ai_message', { role: message.role, text });
   }}
   onError={(error) => {
     // Handle errors
@@ -199,22 +213,14 @@ function Sidebar() {
 />
 ```
 
-### Custom System Prompt
-
-Customize the AI assistant's behavior with a custom system prompt:
+### With Project Identifier
 
 ```tsx
 <AskAIWidget
-  apiUrl="http://localhost:3000"
-  systemPrompt="You are a helpful documentation assistant. Answer questions concisely based on the provided documentation. Always respond in the user's language."
+  apiUrl="http://localhost:3000/api/stream"
+  project="my-documentation"  // Sent in request body
 />
 ```
-
-This allows you to:
-- Define the assistant's personality and tone
-- Set specific instructions for how to handle questions
-- Configure response format preferences
-- Specify language preferences
 
 ## Development
 
