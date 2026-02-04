@@ -12,21 +12,27 @@ interface UseSSEReturn {
 
 /**
  * Parse SSE chunk format for UIMessageChunk stream
- * Format: "0:{...}\n" where 0 is the chunk type identifier
+ * Supports both standard SSE format "data: {...}" and AI SDK v6 format "0:{...}"
  */
 function parseUIMessageChunk(line: string): UIMessageChunk | null {
-  // AI SDK v6 streams chunks in format: "0:{json}\n"
-  if (!line.startsWith('0:')) {
-    return null;
+  // Handle standard SSE format: "data: {json}"
+  if (line.startsWith('data: ')) {
+    const jsonStr = line.slice(6); // Remove "data: " prefix
+
+    // Skip [DONE] marker
+    if (jsonStr === '[DONE]') {
+      return null;
+    }
+
+    try {
+      return JSON.parse(jsonStr) as UIMessageChunk;
+    } catch (err) {
+      console.error('Failed to parse UIMessageChunk:', line, err);
+      return null;
+    }
   }
 
-  try {
-    const jsonStr = line.slice(2);
-    return JSON.parse(jsonStr) as UIMessageChunk;
-  } catch (err) {
-    console.error('Failed to parse UIMessageChunk:', line, err);
-    return null;
-  }
+  return null;
 }
 
 export function useSSE(options: UseSSEOptions = {}): UseSSEReturn {
