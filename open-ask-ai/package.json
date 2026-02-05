@@ -1,6 +1,6 @@
 {
   "name": "open-ask-ai",
-  "version": "0.6.5",
+  "version": "0.7.3",
   "description": "AI-powered Q&A widget for documentation sites",
   "type": "module",
   "main": "./dist/cjs/index.js",

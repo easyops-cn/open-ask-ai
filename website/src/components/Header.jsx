@@ -11,6 +11,15 @@ export default function Header(props) {
       </div>
       <div className="header-right">
         <nav className="header-nav">
+          <a href={baseUrl} className={url === baseUrl ? 'active' : ''}>
+            Docs
+          </a>
+          <a
+            href={`${baseUrl}server/`}
+            className={url === `${baseUrl}server/` ? 'active' : ''}
+          >
+            Server
+          </a>
           <a
             href="https://github.com/easyops-cn/open-ask-ai"
             target="_blank"

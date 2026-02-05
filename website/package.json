@@ -8,7 +8,7 @@
     "serve": "serve ./dist"
   },
   "dependencies": {
-    "open-ask-ai": "^0.6.5",
+    "open-ask-ai": "file:../open-ask-ai",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

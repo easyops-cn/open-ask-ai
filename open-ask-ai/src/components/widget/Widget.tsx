@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Loader2 } from 'lucide-react';
 import { APIClient } from '../../core/api/client.js';
 import { useChat } from '../../core/hooks/useChat.js';
-import type { WidgetProps } from '../../core/types/index.js';
+import type { WidgetProps, WidgetRef } from '../../core/types/index.js';
 import { Trigger } from './Trigger.js';
 import { Drawer } from './Drawer.js';
 import styles from './Widget.module.css';
@@ -10,7 +10,7 @@ import styles from './Widget.module.css';
 // Lazy load heavy components
 const ChatContainer = React.lazy(() => import('../chat/ChatContainer.js').then(m => ({ default: m.ChatContainer })));
 
-export function Widget(props: WidgetProps) {
+function LegacyWidget(props: WidgetProps, ref: React.Ref<WidgetRef>) {
   const {
     apiUrl,
     project,
@@ -73,6 +73,18 @@ export function Widget(props: WidgetProps) {
     resetChat();
   }, [resetChat]);
 
+  React.useImperativeHandle(ref, () => ({
+    open: handleOpen,
+    close: handleClose,
+    openWithNewSession: (message) => {
+      handleNewSession();
+      handleOpen();
+      setTimeout(() => {
+        sendMessage(message);
+      }, 100);
+    },
+  }), [handleOpen, handleClose, handleNewSession]);
+
   // Handle keyboard shortcut
   React.useEffect(() => {
     if (!enableHotkey || !hotkey) return;
@@ -103,7 +115,7 @@ export function Widget(props: WidgetProps) {
   return (
     <div className={`ask-ai ${className || ''} ${theme === 'dark' ? 'dark' : ''}`} style={style}>
       {/* Trigger Button - Custom or Default */}
-      {children &&  React.isValidElement(children) ? (
+      {children && React.isValidElement(children) ? (
         React.cloneElement(children, {
           ...children.props,
           onClick: (e: React.MouseEvent) => {
@@ -161,3 +173,5 @@ export function Widget(props: WidgetProps) {
     </div>
   );
 }
+
+export const Widget = React.forwardRef(LegacyWidget);

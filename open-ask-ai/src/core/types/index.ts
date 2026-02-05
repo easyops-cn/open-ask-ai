@@ -67,3 +67,9 @@ export interface WidgetProps {
     onClick?: (e: React.MouseEvent) => void;
   }>
 }
+
+export interface WidgetRef {
+  open: () => void;
+  close: () => void;
+  openWithNewSession: (message: string) => void;
+}
