@@ -10,7 +10,7 @@ Then integrate with [Open Ask AI Widget](./index.mdx) on your documentation site
 
 ## Usage
 
-1. Click "Use this template" to create your own repo, or fork this repository.
+1. Click "Use this template" to create your own repo, or fork [this repository](https://github.com/easyops-cn/open-ask-ai-server).
 2. Edit `projects.json` to define your documentation projects.
 3. Add your markdown documentation files in the `projects/` directory.
 4. Optionally, add an `AGENTS.md` file in each project folder to provide additional agent instructions, such as what the project is about and what's the docs file structure.
