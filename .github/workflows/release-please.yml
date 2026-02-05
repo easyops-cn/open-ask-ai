@@ -1,0 +1,50 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+
+    outputs:
+      release_created: ${{ steps.release.outputs.open-ask-ai--release_created }}
+
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GH_TOKEN_EVE }}
+
+  npm-publish:
+
+    needs: release-please
+
+    runs-on: ubuntu-latest
+
+    # Ensure that a publication only occurs when a new release is created:
+    if: ${{ needs.release-please.outputs.release_created }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build open-ask-ai
+        run: npm run build -w open-ask-ai
+
+      - name: Publish to npm
+        run: npm publish --workspaces --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

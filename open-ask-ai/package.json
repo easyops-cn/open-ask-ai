@@ -2,6 +2,12 @@
   "name": "open-ask-ai",
   "version": "0.7.3",
   "description": "AI-powered Q&A widget for documentation sites",
+  "homepage": "https://github.com/easyops-cn/open-ask-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/easyops-cn/open-ask-ai",
+    "directory": "open-ask-ai"
+  },
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -66,10 +72,5 @@
     "widget",
     "react"
   ],
-  "author": "",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": ""
-  }
+  "license": "MIT"
 }

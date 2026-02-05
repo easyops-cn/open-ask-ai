@@ -4,7 +4,7 @@ Open Ask AI is an AI-powered Q&A widget for documentation sites. A customizable 
 
 NOTE: this is a frontend-only widget. You need to set up your own backend API to handle AI requests and stream responses via Server-Sent Events (SSE).
 
-Fortunately, setting up the backend is straightforward using the [Open Ask AI Server](https://github.com/easyops-cn/open-ask-ai-server) for free. It leverages AI SDK with Vercel AI Gateway and can be deployed to Vercel as a serverless function in minutes. Using [Vercel Hobby Plan](https://vercel.com/docs/plans/hobby) is free of charge, it includes a generous quota for both hosting and LLM requests.
+Fortunately, setting up the backend is straightforward using the [Open Ask AI Server](https://github.com/easyops-cn/open-ask-ai-server) **for free**. It leverages AI SDK with Vercel AI Gateway and can be deployed to Vercel as a serverless function in minutes. Using [Vercel Hobby Plan](https://vercel.com/docs/plans/hobby) is free of charge, it includes a generous quota for both hosting and LLM requests.
 
 > By default, Open Ask AI Server uses openai/gpt-oss-120b, which charges $0.1/0.5 per 1M input/output tokens <sup>[[1]](https://vercel.com/ai-gateway/models)</sup>. With Vercel Hobby Plan, you get $5 free credit every month, which is enough for 25M tokens. A typical Q&A session consumes less than 5K tokens, so you can have around 5,000 sessions for free every month.
 
@@ -57,7 +57,7 @@ function Header() {
 ### Widget Props
 
 ```tsx
-interface WidgetProps {
+interface AskAIWidgetProps {
   // Required
   apiUrl: string                      // Complete URL to SSE stream endpoint (e.g., 'https://example.com/api/stream')
 

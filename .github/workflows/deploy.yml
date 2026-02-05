@@ -1,0 +1,60 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build open-ask-ai
+        run: npm run build -w open-ask-ai
+
+      - name: Build website
+        run: npm run build -w website
+
+      # - name: Run unit tests
+      #   run: npm run test
+
+      # - name: Deploy to Netlify (pull request)
+      #   id: netlify-deploy
+      #   uses: nwtgck/actions-netlify@v3.0
+      #   with:
+      #     publish-dir: ./website/dist
+      #     production-branch: main
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     deploy-message: "${{ github.event.pull_request.title }}"
+      #     netlify-config-path: ./netlify.toml
+      #   env:
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      #   timeout-minutes: 2
+      #   if: github.event_name == 'pull_request'
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.GH_TOKEN_EVE }}
+          publish_dir: ./website/dist
+          force_orphan: true
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
