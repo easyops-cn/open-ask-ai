@@ -36,20 +36,20 @@ jobs:
       # - name: Run unit tests
       #   run: npm run test
 
-      # - name: Deploy to Netlify (pull request)
-      #   id: netlify-deploy
-      #   uses: nwtgck/actions-netlify@v3.0
-      #   with:
-      #     publish-dir: ./website/dist
-      #     production-branch: main
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     deploy-message: "${{ github.event.pull_request.title }}"
-      #     netlify-config-path: ./netlify.toml
-      #   env:
-      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      #   timeout-minutes: 2
-      #   if: github.event_name == 'pull_request'
+      - name: Deploy to Netlify (pull request)
+        id: netlify-deploy
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: ./website/dist
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "${{ github.event.pull_request.title }}"
+          netlify-config-path: ./netlify.toml
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 2
+        if: github.event_name == 'pull_request'
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

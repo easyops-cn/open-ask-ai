@@ -15,6 +15,7 @@ export default {
       light: 'light-plus',
       dark: 'dark-plus',
     },
+    defaultLanguage: "text",
   },
   components: {
     // Home: 'src/components/Home.jsx',
