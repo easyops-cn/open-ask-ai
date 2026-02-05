@@ -8,6 +8,8 @@ Fortunately, setting up the backend is straightforward using the [Open Ask AI Se
 
 > By default, Open Ask AI Server uses openai/gpt-oss-120b, which charges $0.1/0.5 per 1M input/output tokens <sup>[[1]](https://vercel.com/ai-gateway/models)</sup>. With Vercel Hobby Plan, you get $5 free credit every month, which is enough for 25M tokens. A typical Q&A session consumes less than 5K tokens, so you can have around 5,000 sessions for free every month.
 
+![Open Ask AI Widget Screenshot](./website/assets/open-ask-ai.png)
+
 ## Features
 
 - 🎯 **Embeddable Button**: A regular button component that can be placed anywhere in your layout (header, sidebar, footer, etc.)
