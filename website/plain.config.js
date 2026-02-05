@@ -1,12 +1,11 @@
 // @ts-check
 /** @type {import("plain-blog").SiteConfig} */
 export default {
-  baseUrl: '/open-ask-ai/',
   site: {
     title: 'Open Ask AI',
     description: 'Open Ask AI Client',
     favicon: 'assets/favicon.svg',
-    url: 'https://easyops-cn.github.io/open-ask-ai/',
+    url: 'https://open-ask-ai.js.org/',
   },
   locales: ['en'],
   toc: true,

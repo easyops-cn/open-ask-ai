@@ -1,6 +1,6 @@
 # Open Ask AI
 
-Open Ask AI is an AI-powered Q&A widget for documentation sites. A customizable button component that opens a drawer-style chat interface, designed to be embedded anywhere in your application.
+Open Ask AI is an AI-powered Q&A widget for documentation sites, designed to be embedded anywhere in your application.
 
 NOTE: this is a frontend-only widget. You need to set up your own backend API to handle AI requests and stream responses via Server-Sent Events (SSE).
 
@@ -73,7 +73,7 @@ interface AskAIWidgetProps {
   theme?: 'light' | 'dark'            // Theme (default: 'light')
 
   // Content
-  texts?: WidgetTexts                 // All UI text labels (see below)
+  texts?: AskAIWidgetTexts            // All UI text labels (see below)
   exampleQuestions?: string[]         // Questions shown in empty state
 
   // Interaction
@@ -100,7 +100,7 @@ interface AskAIWidgetProps {
 All UI text can be customized through the `texts` prop:
 
 ```tsx
-interface WidgetTexts {
+interface AskAIWidgetTexts {
   // Button
   triggerButtonText?: string          // Default: "Ask AI"
   triggerButtonAriaLabel?: string     // Default: "Open AI assistant"
