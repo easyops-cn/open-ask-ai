@@ -57,4 +57,5 @@ jobs:
           personal_token: ${{ secrets.GH_TOKEN_EVE }}
           publish_dir: ./website/dist
           force_orphan: true
+          cname: open-ask-ai.js.org
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
