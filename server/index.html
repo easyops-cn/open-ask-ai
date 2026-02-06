@@ -1,0 +1,251 @@
+<html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><script src="/assets/7R6TNSFI.js" async=""></script><title>Open Ask AI Server</title><meta name="title" content="Open Ask AI Server"/><meta name="og:site_name" content="Open Ask AI"/><meta name="og:title" content="Open Ask AI Server"/><meta name="og:type" content="article"/><meta name="og:url" content="https://open-ask-ai.js.org/server/"/><meta name="og:image" content="https://open-ask-ai.js.org/assets/2180889fd9279a36.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:url" content="https://open-ask-ai.js.org/server/"/><meta name="twitter:title" content="Open Ask AI Server"/><meta name="twitter:image" content="https://open-ask-ai.js.org/assets/2180889fd9279a36.svg"/><link rel="icon" href="/assets/2180889fd9279a36.svg"/><link rel="stylesheet" href="/assets/main.2f4b2d0c.css"/></head><body><header><div class="header-left"><a href="/">Open Ask AI</a><div id="nav-ask-ai"></div></div><div class="header-right"><nav class="header-nav"><a href="/" class="">Docs</a><a href="/server/" class="active">Server</a><a href="https://github.com/easyops-cn/open-ask-ai" target="_blank" rel="noopener noreferrer">GitHub<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a></nav><color-mode-switch></color-mode-switch></div></header><main><article><h1>Open Ask AI Server</h1><p>A deployable-ready, serverless documentation assistant AI agent, can be hosted on <a href="(https://vercel.com/docs/functions)">Vercel</a>, leveraging LLM through <a href="https://vercel.com/ai-gateway">Vercel AI Gateway</a>, and providing in-memory filesystem based agentic searching using <a href="https://github.com/vercel-labs/bash-tool">bash-tool</a>, <strong>ALL FOR FREE</strong> (<a href="https://vercel.com/docs/plans/hobby">Vercel Hobby Plan</a> with generous quota usage).</p>
+<p><a href="https://github.com/easyops-cn/open-ask-ai-server">Open Ask AI Server</a> on GitHub is a template repository ready for deploy as a serverless function on Vercel.</p>
+<p>Once deployed, it provides an API endpoint <code>/api/stream</code> that accepts conversation messages and streams back AI-generated responses based on pre-scanned markdown documentation files.</p>
+<p>Then integrate with <a href="/">Open Ask AI Widget</a> on your documentation site.</p>
+<h2 id="usage"><a href="#usage">Usage</a></h2>
+<ol>
+<li>Click &quot;Use this template&quot; to create your own repo, or fork <a href="https://github.com/easyops-cn/open-ask-ai-server">this repository</a>.</li>
+<li>Edit <code>projects.json</code> to define your documentation projects.</li>
+<li>Add your markdown documentation files in the <code>projects/</code> directory.</li>
+<li>Optionally, add an <code>AGENTS.md</code> file in each project folder to provide additional agent instructions, such as what the project is about and what&#x27;s the docs file structure.</li>
+<li>Deploy to Vercel using the Vercel CLI.</li>
+</ol>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">npm</span><span style="color:#A31515;--shiki-dark:#CE9178"> i</span><span style="color:#0000FF;--shiki-dark:#569CD6"> -g</span><span style="color:#A31515;--shiki-dark:#CE9178"> vercel</span></span>
+<span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">vercel</span><span style="color:#A31515;--shiki-dark:#CE9178"> login</span></span>
+<span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">vercel</span><span style="color:#0000FF;--shiki-dark:#569CD6"> --prod</span></span></code></cp-pre>
+<p>Your AI agent API will be live at <code>https://&lt;your-vercel-project&gt;.vercel.app/api/stream</code>.</p>
+<p>It accepts a POST request with conversation messages and streams back AI-generated responses. See the &quot;API Endpoints&quot; section below for details.</p>
+<h2 id="features"><a href="#features">Features</a></h2>
+<ul>
+<li><strong>Multi-project support</strong>: Serve multiple documentation projects from a single deployment</li>
+<li><strong>Conversation-based API</strong>: Full conversation history support with UIMessage format</li>
+<li><strong>Streaming AI responses</strong>: Real-time interaction with ToolLoopAgent</li>
+<li><strong>Pre-generated documentation</strong>: Fast in-memory file access from pre-scanned JSON</li>
+<li><strong>Read-only bash access</strong>: Secure bash commands for searching markdown documentation</li>
+<li><strong>Production-ready</strong>: Vercel Functions with Fluid compute for cost-efficient scaling</li>
+</ul>
+<h2 id="architecture"><a href="#architecture">Architecture</a></h2>
+<h3 id="core-components"><a href="#core-components">Core Components</a></h3>
+<ul>
+<li><strong>API Endpoint</strong>: <code>/api/stream</code> - POST endpoint with streaming UIMessage responses</li>
+<li><strong>Agent</strong>: AI SDK v6 ToolLoopAgent with bash and readFile tools</li>
+<li><strong>Documentation Scanner</strong>: Pre-scans project docs into JSON files for fast access</li>
+<li><strong>Project System</strong>: Multi-project configuration via <code>projects.json</code></li>
+<li><strong>Model</strong>: OpenAI GPT-OSS-120B with low reasoning effort for fast responses</li>
+<li><strong>Deployment</strong>: Vercel Functions with Fluid compute (60s max duration)</li>
+</ul>
+<h3 id="how-it-works"><a href="#how-it-works">How It Works</a></h3>
+<ol>
+<li><strong>Pre-generation</strong>: Run <code>npm run build</code> to scan all projects in <code>projects/</code> directory</li>
+<li><strong>Generated Files</strong>: Creates JSON files in <code>generated/</code> with all markdown content</li>
+<li><strong>Runtime</strong>: API loads project JSON into memory and creates bash-tool with files</li>
+<li><strong>Agent Execution</strong>: ToolLoopAgent uses bash commands to search pre-loaded files</li>
+<li><strong>Streaming</strong>: Returns UIMessage stream compatible with AI SDK UI components</li>
+</ol>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span>Client Request → Vercel Function → AI SDK</span></span>
+<span class="line"><span>                                      ↓</span></span>
+<span class="line"><span>                                ToolLoopAgent</span></span>
+<span class="line"><span>                                      ↓</span></span>
+<span class="line"><span>                                  bash-tool</span></span>
+<span class="line"><span>                                      ↓</span></span>
+<span class="line"><span>                          Pre-loaded Files (in-memory)</span></span>
+<span class="line"><span>                                      ↓</span></span>
+<span class="line"><span>                          Streaming Response → Client</span></span></code></cp-pre>
+<h2 id="prerequisites"><a href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Node.js 20+</li>
+<li>Markdown documentation files</li>
+</ul>
+<h2 id="setup"><a href="#setup">Setup</a></h2>
+<h3 id="1-install-dependencies"><a href="#1-install-dependencies">1. Install Dependencies</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">npm</span><span style="color:#A31515;--shiki-dark:#CE9178"> install</span></span></code></cp-pre>
+<h3 id="2-configure-projects"><a href="#2-configure-projects">2. Configure Projects</a></h3>
+<p>Edit <code>projects.json</code> to define your documentation projects:</p>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">  &quot;my-project&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#000000;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">    &quot;name&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;My Project&quot;</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">  </span><span style="color:#000000;--shiki-dark:#D4D4D4">}</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">}</span></span></code></cp-pre>
+<h3 id="3-add-documentation"><a href="#3-add-documentation">3. Add Documentation</a></h3>
+<p>Create a directory for each project in <code>projects/</code>:</p>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span>projects/</span></span>
+<span class="line"><span>├── my-project/</span></span>
+<span class="line"><span>│   ├── AGENTS.md             # (Optional) Agent instructions</span></span>
+<span class="line"><span>│   ├── getting-started.md</span></span>
+<span class="line"><span>│   ├── api-reference.md</span></span>
+<span class="line"><span>│   └── guides/</span></span>
+<span class="line"><span>│       └── authentication.md</span></span></code></cp-pre>
+<h3 id="4-generate-documentation-files"><a href="#4-generate-documentation-files">4. Generate Documentation Files</a></h3>
+<p>Scan all projects and generate JSON files:</p>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">npm</span><span style="color:#A31515;--shiki-dark:#CE9178"> run</span><span style="color:#A31515;--shiki-dark:#CE9178"> build</span></span></code></cp-pre>
+<p>This creates files in <code>generated/</code>:</p>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span>generated/</span></span>
+<span class="line"><span>└── my-project.json</span></span></code></cp-pre>
+<h3 id="5-initialize-vercel-project"><a href="#5-initialize-vercel-project">5. Initialize Vercel Project</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">npm</span><span style="color:#A31515;--shiki-dark:#CE9178"> install</span><span style="color:#0000FF;--shiki-dark:#569CD6"> -g</span><span style="color:#A31515;--shiki-dark:#CE9178"> vercel</span></span>
+<span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">vercel</span><span style="color:#A31515;--shiki-dark:#CE9178"> login</span></span>
+<span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">vercel</span></span></code></cp-pre>
+<h3 id="5-run-locally"><a href="#5-run-locally">5. Run Locally</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">vercel</span><span style="color:#A31515;--shiki-dark:#CE9178"> dev</span></span></code></cp-pre>
+<p>Visit <code>http://localhost:3000/api/health</code> to verify the server is running.</p>
+<h2 id="api-endpoints"><a href="#api-endpoints">API Endpoints</a></h2>
+<h3 id="get-apihealth"><a href="#get-apihealth">GET /api/health</a></h3>
+<p>Health check endpoint.</p>
+<p><strong>Response</strong>:</p>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">  &quot;status&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;ok&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">  &quot;timestamp&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;2026-02-04T12:00:00.000Z&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">  &quot;version&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;1.0.0&quot;</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">}</span></span></code></cp-pre>
+<h3 id="post-apistream"><a href="#post-apistream">POST /api/stream</a></h3>
+<p>Streaming conversation endpoint with multi-project support.</p>
+<p><strong>Request</strong>:</p>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">  &quot;messages&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#000000;--shiki-dark:#D4D4D4">[</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">    </span><span style="color:#000000;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">      &quot;role&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;user&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">      &quot;parts&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#000000;--shiki-dark:#D4D4D4">[</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">        </span><span style="color:#000000;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">          &quot;type&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;text&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">          &quot;text&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;How do I configure authentication?&quot;</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">        </span><span style="color:#000000;--shiki-dark:#D4D4D4">}</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">      </span><span style="color:#000000;--shiki-dark:#D4D4D4">]</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">    </span><span style="color:#000000;--shiki-dark:#D4D4D4">}</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">  </span><span style="color:#000000;--shiki-dark:#D4D4D4">]</span><span style="color:#000000;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#0451A5;--shiki-dark:#9CDCFE">  &quot;project&quot;</span><span style="color:#000000;--shiki-dark:#D4D4D4">: </span><span style="color:#A31515;--shiki-dark:#CE9178">&quot;my-project&quot;</span></span>
+<span class="line"><span style="color:#000000;--shiki-dark:#D4D4D4">}</span></span></code></cp-pre>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>messages</code> (optional): Array of UIMessage objects for conversation history</li>
+<li><code>project</code> (optional): Project ID to use (defaults to first project in projects.json)</li>
+</ul>
+<p><strong>Response</strong>: Server-Sent Events stream with UIMessage format</p>
+<h2 id="usage-examples"><a href="#usage-examples">Usage Examples</a></h2>
+<h3 id="health-check"><a href="#health-check">Health Check</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">curl</span><span style="color:#A31515;--shiki-dark:#CE9178"> http://localhost:3000/api/health</span></span></code></cp-pre>
+<h3 id="simple-query"><a href="#simple-query">Simple Query</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">curl</span><span style="color:#0000FF;--shiki-dark:#569CD6"> -X</span><span style="color:#A31515;--shiki-dark:#CE9178"> POST</span><span style="color:#A31515;--shiki-dark:#CE9178"> http://localhost:3000/api/stream</span><span style="color:#EE0000;--shiki-dark:#D7BA7D"> \</span></span>
+<span class="line"><span style="color:#0000FF;--shiki-dark:#569CD6">  -H</span><span style="color:#A31515;--shiki-dark:#CE9178"> &quot;Content-Type: application/json&quot;</span><span style="color:#EE0000;--shiki-dark:#D7BA7D"> \</span></span>
+<span class="line"><span style="color:#0000FF;--shiki-dark:#569CD6">  -d</span><span style="color:#A31515;--shiki-dark:#CE9178"> &#x27;{</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    &quot;messages&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;role&quot;: &quot;user&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;parts&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;type&quot;: &quot;text&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;text&quot;: &quot;What topics are covered in the documentation?&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        ]</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    ],</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    &quot;project&quot;: &quot;my-project&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">  }&#x27;</span></span></code></cp-pre>
+<h3 id="query-specific-project"><a href="#query-specific-project">Query Specific Project</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">curl</span><span style="color:#0000FF;--shiki-dark:#569CD6"> -X</span><span style="color:#A31515;--shiki-dark:#CE9178"> POST</span><span style="color:#A31515;--shiki-dark:#CE9178"> http://localhost:3000/api/stream</span><span style="color:#EE0000;--shiki-dark:#D7BA7D"> \</span></span>
+<span class="line"><span style="color:#0000FF;--shiki-dark:#569CD6">  -H</span><span style="color:#A31515;--shiki-dark:#CE9178"> &quot;Content-Type: application/json&quot;</span><span style="color:#EE0000;--shiki-dark:#D7BA7D"> \</span></span>
+<span class="line"><span style="color:#0000FF;--shiki-dark:#569CD6">  -d</span><span style="color:#A31515;--shiki-dark:#CE9178"> &#x27;{</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    &quot;messages&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;role&quot;: &quot;user&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;parts&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;type&quot;: &quot;text&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;text&quot;: &quot;Find API endpoints&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        ]</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    ],</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    &quot;project&quot;: &quot;my-project&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">  }&#x27;</span></span></code></cp-pre>
+<h3 id="conversation-with-history"><a href="#conversation-with-history">Conversation with History</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">curl</span><span style="color:#0000FF;--shiki-dark:#569CD6"> -X</span><span style="color:#A31515;--shiki-dark:#CE9178"> POST</span><span style="color:#A31515;--shiki-dark:#CE9178"> http://localhost:3000/api/stream</span><span style="color:#EE0000;--shiki-dark:#D7BA7D"> \</span></span>
+<span class="line"><span style="color:#0000FF;--shiki-dark:#569CD6">  -H</span><span style="color:#A31515;--shiki-dark:#CE9178"> &quot;Content-Type: application/json&quot;</span><span style="color:#EE0000;--shiki-dark:#D7BA7D"> \</span></span>
+<span class="line"><span style="color:#0000FF;--shiki-dark:#569CD6">  -d</span><span style="color:#A31515;--shiki-dark:#CE9178"> &#x27;{</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    &quot;messages&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;role&quot;: &quot;user&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;parts&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;type&quot;: &quot;text&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;text&quot;: &quot;What is authentication?&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        ]</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      },</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;role&quot;: &quot;assistant&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;parts&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;type&quot;: &quot;text&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;text&quot;: &quot;Authentication is...&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        ]</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      },</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;role&quot;: &quot;user&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        &quot;parts&quot;: [</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          {</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;type&quot;: &quot;text&quot;,</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">            &quot;text&quot;: &quot;How do I implement it?&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">          }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">        ]</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">      }</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    ],</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">    &quot;project&quot;: &quot;my-project&quot;</span></span>
+<span class="line"><span style="color:#A31515;--shiki-dark:#CE9178">  }&#x27;</span></span></code></cp-pre>
+<h2 id="project-structure"><a href="#project-structure">Project Structure</a></h2>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span>open-ask-ai-server/</span></span>
+<span class="line"><span>├── api/</span></span>
+<span class="line"><span>│   ├── health.ts                    # GET /api/health</span></span>
+<span class="line"><span>│   └── stream.ts                    # POST /api/stream</span></span>
+<span class="line"><span>├── lib/</span></span>
+<span class="line"><span>│   ├── types.ts                     # TypeScript interfaces</span></span>
+<span class="line"><span>│   ├── utils.ts                     # Error handling utilities</span></span>
+<span class="line"><span>│   ├── bash-tool-setup.ts          # OverlayFs + createBashTool config</span></span>
+<span class="line"><span>│   └── agent.ts                     # Agent configuration</span></span>
+<span class="line"><span>├── scripts/</span></span>
+<span class="line"><span>│   └── scan-docs.ts                 # Documentation scanner</span></span>
+<span class="line"><span>├── projects/</span></span>
+<span class="line"><span>│   └── [project-id]/                # Project documentation directories</span></span>
+<span class="line"><span>│       └── *.md                     # Markdown files</span></span>
+<span class="line"><span>├── generated/</span></span>
+<span class="line"><span>│   └── [project-id].json            # Generated project files</span></span>
+<span class="line"><span>├── projects.json                    # Project configuration</span></span>
+<span class="line"><span>├── package.json                     # Dependencies</span></span>
+<span class="line"><span>├── tsconfig.json                    # TypeScript config</span></span>
+<span class="line"><span>├── vercel.json                      # Vercel deployment config</span></span>
+<span class="line"><span>└── README.md                        # Documentation</span></span></code></cp-pre>
+<h2 id="agent-capabilities"><a href="#agent-capabilities">Agent Capabilities</a></h2>
+<p>The agent can execute bash commands to explore documentation:</p>
+<ul>
+<li><code>find</code> - Locate markdown files</li>
+<li><code>grep</code> - Search for keywords</li>
+<li><code>cat</code> - Read file contents</li>
+<li><code>head</code>/<code>tail</code> - Preview files</li>
+<li>Pipes and command combinations</li>
+</ul>
+<p>All commands operate on pre-loaded in-memory files for fast access.</p>
+<h2 id="deployment"><a href="#deployment">Deployment</a></h2>
+<h3 id="deploy-to-vercel"><a href="#deploy-to-vercel">Deploy to Vercel</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">vercel</span><span style="color:#0000FF;--shiki-dark:#569CD6"> --prod</span></span></code></cp-pre>
+<h2 id="development"><a href="#development">Development</a></h2>
+<h3 id="type-checking"><a href="#type-checking">Type Checking</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">npx</span><span style="color:#A31515;--shiki-dark:#CE9178"> tsc</span><span style="color:#0000FF;--shiki-dark:#569CD6"> --noEmit</span></span></code></cp-pre>
+<h3 id="local-development"><a href="#local-development">Local Development</a></h3>
+<cp-pre class="shiki shiki-themes light-plus dark-plus" style="background-color:#FFFFFF;--shiki-dark-bg:#1E1E1E;color:#000000;--shiki-dark:#D4D4D4" tabIndex="0"><code><span class="line"><span style="color:#795E26;--shiki-dark:#DCDCAA">vercel</span><span style="color:#A31515;--shiki-dark:#CE9178"> dev</span></span></code></cp-pre>
+<h2 id="performance"><a href="#performance">Performance</a></h2>
+<ul>
+<li><strong>Pre-generated Files</strong>: All documentation loaded into memory at startup</li>
+<li><strong>Fluid Compute</strong>: Enabled for cost-efficient scaling</li>
+<li><strong>maxDuration: 60</strong>: Functions can run up to 60 seconds</li>
+<li><strong>just-bash</strong>: A simulated bash environment with an in-memory virtual filesystem</li>
+<li><strong>Streaming</strong>: Real-time responses improve perceived performance</li>
+</ul>
+<h2 id="security"><a href="#security">Security</a></h2>
+<ul>
+<li><strong>Read-Only Access</strong>: just-bash provides a read-only in-memory virtual filesystem</li>
+<li><strong>Input Validation</strong>: Messages validated before processing</li>
+<li><strong>No LLM API Keys</strong>: Vercel Functions call Vercel AI Gateway directly</li>
+<li><strong>No File System Access</strong>: All files pre-loaded from JSON</li>
+</ul>
+<h2 id="license"><a href="#license">License</a></h2>
+<p>MIT</p></article><nav><ul><li><a href="#usage">Usage</a></li><li><a href="#features">Features</a></li><li><a href="#architecture">Architecture</a><ul><li><a href="#core-components">Core Components</a></li><li><a href="#how-it-works">How It Works</a></li></ul></li><li><a href="#prerequisites">Prerequisites</a></li><li><a href="#setup">Setup</a><ul><li><a href="#1-install-dependencies">1. Install Dependencies</a></li><li><a href="#2-configure-projects">2. Configure Projects</a></li><li><a href="#3-add-documentation">3. Add Documentation</a></li><li><a href="#4-generate-documentation-files">4. Generate Documentation Files</a></li><li><a href="#5-initialize-vercel-project">5. Initialize Vercel Project</a></li><li><a href="#5-run-locally">5. Run Locally</a></li></ul></li><li><a href="#api-endpoints">API Endpoints</a><ul><li><a href="#get-apihealth">GET /api/health</a></li><li><a href="#post-apistream">POST /api/stream</a></li></ul></li><li><a href="#usage-examples">Usage Examples</a><ul><li><a href="#health-check">Health Check</a></li><li><a href="#simple-query">Simple Query</a></li><li><a href="#query-specific-project">Query Specific Project</a></li><li><a href="#conversation-with-history">Conversation with History</a></li></ul></li><li><a href="#project-structure">Project Structure</a></li><li><a href="#agent-capabilities">Agent Capabilities</a></li><li><a href="#deployment">Deployment</a><ul><li><a href="#deploy-to-vercel">Deploy to Vercel</a></li></ul></li><li><a href="#development">Development</a><ul><li><a href="#type-checking">Type Checking</a></li><li><a href="#local-development">Local Development</a></li></ul></li><li><a href="#performance">Performance</a></li><li><a href="#security">Security</a></li><li><a href="#license">License</a></li></ul></nav></main><footer>© 2026 • Built with <a href="https://github.com/weareoutman/plain-blog">Plain Blog</a> • <a href="https://github.com/easyops-cn/open-ask-ai">GitHub</a></footer></body></html>
