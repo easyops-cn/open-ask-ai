@@ -13,7 +13,7 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "plain-blog": "^0.7.1",
+    "plain-blog": "^0.7.2",
     "serve": "^14.2.5"
   }
 }

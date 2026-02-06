@@ -2,7 +2,7 @@
 
 Open Ask AI is an AI-powered Q&A widget for documentation sites, designed to be embedded anywhere in your application.
 
-![Open Ask AI Widget Screenshot](./website/assets/open-ask-ai.png)
+![Open Ask AI Widget Screenshot](./website/assets/open-ask-ai@2x.png)
 
 NOTE: this is a frontend-only widget. You need to set up your own backend API to handle AI requests and stream responses via Server-Sent Events (SSE).
 
